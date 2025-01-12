@@ -90,10 +90,9 @@ class RegexParser:
                 if self.in_parse_lookahead:
                     return {} #error
                 self.index+=1
-                save = self.in_parse_lookahead
                 self.in_parse_lookahead = True
                 node = self.alternation()
-                self.in_parse_lookahead = save
+                self.in_parse_lookahead = False
                 if self.pattern[self.index].kind == 'right_bracket':
                     self.index+=1
                 else:
@@ -291,9 +290,10 @@ error_patterns = [
     'fb|*',
     ')fb|ui',
     '()',
+    '(?=(?:sd))|(?=(?=df))|(?=(?=df))'
     
 ]
-for pattern in ok_patterns:
+for pattern in error_patterns:
     parser = RegexParser(pattern)
     
     print("Entered pattern: ",pattern)
