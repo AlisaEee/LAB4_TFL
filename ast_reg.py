@@ -180,8 +180,10 @@ class RegexParser:
         return True
     def print_grammar(self,grammar_rules):
         for nt in grammar_rules:
-            for rhs in grammar_rules[nt]:
-                print(nt,'->',rhs)
+            if len(grammar_rules[nt]) == 1:
+                print(nt,'->',grammar_rules[nt][0])
+            else:
+                print(nt,'->',' | '.join(grammar_rules[nt]))
         
     def build_grammar(self,ast,rule_name="S",index = 0):
         #ast = self.ast_tree
@@ -210,7 +212,7 @@ class RegexParser:
                 self.rules[name] = []
                 alternatives.append(name)
                 self.build_grammar(option,name,index)
-            self.rules[rule_name].append(alternatives)
+            self.rules[rule_name].extend(alternatives)
         elif ast['kind'] == 'concatination':
             # Обрабатываем конкатенацию
             concatenation = []
@@ -221,7 +223,7 @@ class RegexParser:
                 concatenation.append(name)
                 self.build_grammar(item,name,index)
             self.rules[rule_name] = []
-            self.rules[rule_name].append(concatenation)
+            self.rules[rule_name].append(' '.join(concatenation))
         elif ast['kind'] == 'letter':
             # Обрабатываем литерал
             self.rules[rule_name] = []
@@ -239,8 +241,8 @@ class RegexParser:
             self.rules[rule_name] = []
             name = rule_name + f'_{index}'
             index+=1
-            self.rules[rule_name].append([name,rule_name])
-            self.rules[rule_name].append('e')
+            self.rules[rule_name].append(' '.join([name,rule_name]))
+            self.rules[rule_name].append('eps')
             self.build_grammar(ast['value'],name,index)
         elif ast['kind'] == 'lookahead':
             name = f'LOOK_{index}'
@@ -248,7 +250,7 @@ class RegexParser:
             self.rules[name] = []
             self.rules[rule_name] = []
             self.rules[rule_name].append(name)
-            self.rules[name].append('e')
+            self.rules[name].append('eps')
         elif ast['kind'] == 'non_capturing':  
             self.rules[rule_name]=[]
             capturing_rule_name = f"NonCap_{index}"
@@ -293,7 +295,7 @@ error_patterns = [
     '(?=(?:sd))|(?=(?=df))|(?=(?=df))'
     
 ]
-for pattern in error_patterns:
+for pattern in ok_patterns:
     parser = RegexParser(pattern)
     
     print("Entered pattern: ",pattern)
